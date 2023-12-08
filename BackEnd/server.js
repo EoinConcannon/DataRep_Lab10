@@ -7,15 +7,21 @@ const express = require('express')
 const app = express()
 const port = 4000
 
-const cors = require('cors');
-app.use(cors());
-app.use(function (req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    res.header("Access-Control-Allow-Headers",
-        "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-});
+// Serve the static files from the React app
+const path = require('path');
+app.use(express.static(path.join(__dirname, '../build')));
+app.use('/static', express.static(path.join(__dirname, 'build//static')));
+
+// const cors = require('cors'); //can now comment out this cors/app.use because of app.get(*) below
+// app.use(cors());
+// app.use(function (req, res, next) {
+//     res.header("Access-Control-Allow-Origin", "*");
+//     res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+//     res.header("Access-Control-Allow-Headers",
+//         "Origin, X-Requested-With, Content-Type, Accept");
+//     next();
+// });
+//single page apps need to rebuild app after changes are made
 
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -83,6 +89,12 @@ app.get('/api/book/:id', async (req, res) => {
     res.send(book);
 })
 //http://localhost:4000/api/book/655737cc2cda8f8c0738efa2  type this to url to see the book you added via id
+
+// Handles any requests that don't match the ones above
+app.get('*', (req, res) => { //sends the webpage back (* = any urlthat doresn't exist sends you back to homepage)
+    res.sendFile(path.join(__dirname + '/../build/index.html'));
+});
+
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
